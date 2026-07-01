@@ -244,3 +244,4 @@ export function DigitsView(props: DigitsViewProps) {
     </main>
   );
 }
+
