@@ -9,8 +9,6 @@ interface DigitStatsBarProps {
   digitStats: DigitStats;
   selectedDigit: number;
   onDigitSelect: (digit: number) => void;
-
-  // NEW
   cursorColor?: 'red' | 'green';
 }
 
@@ -29,24 +27,21 @@ export function DigitStatsBar({
         Last digit prediction
       </span>
 
-      <div className="flex-1 flex items-center min-h-0">
-        <div className="grid grid-cols-5 gap-1.5 sm:gap-3 place-items-center w-full">
+      <div className="flex-1 flex items-center">
+        <div className="grid grid-cols-5 gap-1.5 sm:gap-3 w-full place-items-center">
           {digitStats.percentages.map((pct, digit) => {
             const isSelected = digit === selectedDigit;
             const isHighest = digitStats.totalTicks > 0 && pct === maxPct;
             const isLowest = digitStats.totalTicks > 0 && pct === minPct;
 
             return (
-              <div
-                key={digit}
-                className="flex flex-col items-center gap-1 sm:gap-1.5"
-              >
-                {/* Moving cursor */}
+              <div key={digit} className="flex flex-col items-center gap-1">
+                {/* Arrow */}
                 <div className="h-5 flex items-center justify-center">
                   {isSelected && (
                     <ChevronDown
                       className={cn(
-                        'w-5 h-5 animate-bounce transition-all duration-300',
+                        'w-5 h-5 animate-bounce transition-colors duration-300',
                         cursorColor === 'green'
                           ? 'text-green-500'
                           : 'text-red-500'
@@ -55,27 +50,26 @@ export function DigitStatsBar({
                   )}
                 </div>
 
+                {/* Digit Button */}
                 <Button
                   variant="outline"
                   onClick={() => onDigitSelect(digit)}
                   className={cn(
-                    'w-11 h-11 sm:w-14 sm:h-14 text-base sm:text-xl font-semibold rounded-lg p-0 transition-all duration-300',
+                    'w-11 h-11 sm:w-14 sm:h-14 text-base sm:text-xl font-semibold p-0 transition-all',
                     isSelected
                       ? 'border-red-500 ring-2 ring-red-500'
-                      : 'bg-muted/50 border-muted-foreground/20'
+                      : 'opacity-80'
                   )}
                 >
                   {digit}
                 </Button>
 
+                {/* Percentage */}
                 <span
                   className={cn(
                     'text-xs font-mono',
                     isHighest && 'text-green-500 font-semibold',
-                    isLowest && 'text-red-500 font-semibold',
-                    !isHighest &&
-                      !isLowest &&
-                      'text-muted-foreground'
+                    isLowest && 'text-red-500 font-semibold'
                   )}
                 >
                   {pct.toFixed(1)}%
