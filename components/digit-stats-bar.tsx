@@ -1,4 +1,30 @@
-'use client';
+<div key={digit} className="flex flex-col items-center gap-1 sm:gap-1.5">
+  {isSelected && (
+    <ChevronDown className="w-5 h-5 text-red-500 animate-bounce" />
+  )}
+
+  <Button
+    variant={isSelected ? 'default' : 'outline'}
+    onClick={() => onDigitSelect(digit)}
+    className={cn(
+      'w-11 h-11 sm:w-14 sm:h-14 text-base sm:text-xl font-semibold rounded-lg p-0',
+      !isSelected && 'bg-muted/50 border-muted-foreground/20'
+    )}
+  >
+    {digit}
+  </Button>
+
+  <span
+    className={cn(
+      'text-xs font-mono',
+      isHighest && 'text-green-500 font-semibold',
+      isLowest && 'text-red-500 font-semibold',
+      !isHighest && !isLowest && 'text-muted-foreground'
+    )}
+  >
+    {pct.toFixed(1)}%
+  </span>
+</div>'use client';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
