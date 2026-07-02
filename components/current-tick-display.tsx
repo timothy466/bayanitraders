@@ -1,9 +1,7 @@
 'use client';
 
 import type { Tick } from '../lib/types';
-import type { ActiveSymbol } from '../lib/types';
-
-interface CurrentTickDisplayProps {
+import type { ActiveSymbol } from '../lib/types a red cursir moving across the digits bars
   tick: Tick | null;
   lastDigit: number | null;
   activeSymbol: ActiveSymbol | null;
