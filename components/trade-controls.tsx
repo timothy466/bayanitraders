@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -93,20 +93,34 @@ export function TradeControls({
   onClearBuyResult,
   isAuthenticated,
 }: TradeControlsProps) {
+  const [tradeResult, setTradeResult] = useState<'win' | 'loss' | null>(null);
+
   useEffect(() => {
     if (buyError) {
-      toast.error('Purchase Failed', { description: buyError });
+      toast.error('Purchase Failed', {
+        description: buyError,
+      });
       onClearBuyResult();
     }
   }, [buyError, onClearBuyResult]);
 
   useEffect(() => {
-    if (buyResult) {
-      toast.success('Contract Purchased', {
-        description: `Buy price: ${buyResult.buyPrice.toFixed(2)} USD | Payout: ${buyResult.payout.toFixed(2)} USD | Balance: ${buyResult.balanceAfter.toFixed(2)} USD`,
-      });
+    if (!buyResult) return;
+
+    toast.success('Contract Purchased', {
+      description: `Buy price: ${buyResult.buyPrice.toFixed(
+        2
+      )} USD | Payout: ${buyResult.payout.toFixed(2)} USD`,
+    });
+
+    setTradeResult('win');
+
+    const timer = setTimeout(() => {
+      setTradeResult(null);
       onClearBuyResult();
-    }
+    }, 1500);
+
+    return () => clearTimeout(timer);
   }, [buyResult, onClearBuyResult]);
 
   const modeOptions = CONTRACT_MODE_OPTIONS[tradeType];
@@ -116,12 +130,12 @@ export function TradeControls({
       <ToggleGroup
         type="single"
         value={contractMode}
-        onValueChange={value => {
+        onValueChange={(value) => {
           if (value) onContractModeChange(value as ContractMode);
         }}
         className="w-full gap-0 rounded-full bg-muted p-1"
       >
-        {modeOptions.map(opt => (
+        {modeOptions.map((opt) => (
           <ToggleGroupItem
             key={opt.value}
             value={opt.value}
@@ -141,15 +155,13 @@ export function TradeControls({
             id="stake"
             type="number"
             value={stake}
-            onChange={e => onStakeChange(e.target.value)}
-            onKeyDown={e => {
-              if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
-            }}
+            onChange={(e) => onStakeChange(e.target.value)}
             min={0}
             step="0.01"
             labelRight="USD"
           />
         </div>
+
         <div className="space-y-1.5">
           <Label htmlFor="duration" className="text-xs text-muted-foreground">
             Duration
@@ -158,9 +170,9 @@ export function TradeControls({
             id="duration"
             type="number"
             value={duration}
-            onChange={e => {
-              const val = parseInt(e.target.value, 10);
-              if (!isNaN(val)) onDurationChange(val);
+            onChange={(e) => {
+              const value = parseInt(e.target.value, 10);
+              if (!isNaN(value)) onDurationChange(value);
             }}
             min={durationLimits.min}
             max={durationLimits.max}
@@ -170,11 +182,15 @@ export function TradeControls({
         </div>
       </div>
 
-      <div className="rounded-lg border border-border p-2 sm:p-3 bg-muted/20 space-y-1.5 sm:space-y-2">
-        <p className="text-[11px] sm:text-xs text-muted-foreground mb-0 sm:mb-1">Prediction</p>
-        <p className="text-xs sm:text-sm font-medium">
-          Last digit of the price will{' '}
-          <span className="text-primary font-bold">{getPredictionText(contractMode)}</span>
+      <div className="rounded-lg border border-border p-3 bg-muted/20">
+        <p className="text-xs text-muted-foreground mb-2">Prediction</p>
+
+        <p className="text-sm font-medium">
+          Last digit will{' '}
+          <span className="text-primary font-bold">
+            {getPredictionText(contractMode)}
+          </span>
+
           {showDigitInPrediction(contractMode) && (
             <>
               {' '}
@@ -184,37 +200,36 @@ export function TradeControls({
             </>
           )}
         </p>
+
         {(proposal || isProposalLoading) && (
-          <div className="flex items-center justify-between pt-1 border-t border-border">
+          <div className="flex justify-between mt-3 pt-2 border-t">
             <span className="text-xs text-muted-foreground">Payout</span>
+
             {isProposalLoading ? (
-              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-20" />
             ) : (
-              <span className="text-sm font-bold text-foreground">
-                {proposal!.payout.toFixed(2)} USD
+              <span className="font-bold">
+                {proposal?.payout.toFixed(2)} USD
               </span>
             )}
           </div>
         )}
       </div>
 
-      {/* Buy button — fixed above footer on mobile, inline on desktop */}
-      <div className="max-lg:fixed max-lg:bottom-[calc(env(safe-area-inset-bottom)+2.5rem)] max-lg:left-3 max-lg:right-3 lg:static">
-        <Button
-          className="w-full h-10 rounded-full px-6 sm:h-11 sm:px-8"
-          disabled={!isConnected || !proposal || isBuying}
-          onClick={onBuy}
-        >
-          {isBuying
-            ? 'Purchasing...'
-            : proposal
-              ? `Buy @ ${proposal.askPrice.toFixed(2)} USD`
-              : 'Buy Contract'}
-        </Button>
-      </div>
+      <Button
+        className="w-full h-11 rounded-full"
+        disabled={!isConnected || !proposal || isBuying}
+        onClick={onBuy}
+      >
+        {isBuying
+          ? 'Purchasing...'
+          : proposal
+          ? `Buy @ ${proposal.askPrice.toFixed(2)} USD`
+          : 'Buy Contract'}
+      </Button>
 
       {isAuthenticated && (
-        <Button asChild variant="ghost" className="w-full text-sm text-muted-foreground hover:text-foreground">
+        <Button asChild variant="ghost" className="w-full">
           <Link href="/reports">View your positions →</Link>
         </Button>
       )}
