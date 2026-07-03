@@ -2,23 +2,25 @@
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import type { DigitStats } from '../lib/types';
 import { ChevronDown } from 'lucide-react';
+import type { DigitStats } from '../lib/types';
 
 interface DigitStatsBarProps {
   digitStats: DigitStats;
   selectedDigit: number;
   onDigitSelect: (digit: number) => void;
 
-  // NEW
-  cursorColor?: 'red' | 'green';
+  // Optional animation props
+  cursorDigit?: number;
+  result?: 'win' | 'loss' | null;
 }
 
 export function DigitStatsBar({
   digitStats,
   selectedDigit,
   onDigitSelect,
-  cursorColor = 'red',
+  cursorDigit = selectedDigit,
+  result = null,
 }: DigitStatsBarProps) {
   const maxPct = Math.max(...digitStats.percentages);
   const minPct = Math.min(...digitStats.percentages);
@@ -33,36 +35,42 @@ export function DigitStatsBar({
         <div className="grid grid-cols-5 gap-1.5 sm:gap-3 place-items-center w-full">
           {digitStats.percentages.map((pct, digit) => {
             const isSelected = digit === selectedDigit;
-            const isHighest = digitStats.totalTicks > 0 && pct === maxPct;
-            const isLowest = digitStats.totalTicks > 0 && pct === minPct;
+            const isHighest =
+              digitStats.totalTicks > 0 && pct === maxPct;
+            const isLowest =
+              digitStats.totalTicks > 0 && pct === minPct;
+
+            const showCursor = digit === cursorDigit;
 
             return (
               <div
                 key={digit}
                 className="flex flex-col items-center gap-1 sm:gap-1.5"
               >
-                {/* Moving cursor */}
-                <div className="h-5 flex items-center justify-center">
-                  {isSelected && (
-                    <ChevronDown
-                      className={cn(
-                        'w-5 h-5 animate-bounce transition-all duration-300',
-                        cursorColor === 'green'
-                          ? 'text-green-500'
-                          : 'text-red-500'
-                      )}
-                    />
-                  )}
-                </div>
+                {showCursor && (
+                  <ChevronDown
+                    className={cn(
+                      "w-5 h-5 animate-bounce",
+                      result === "win" && "text-green-500",
+                      result === "loss" && "text-red-500",
+                      result === null && "text-blue-500"
+                    )}
+                  />
+                )}
 
                 <Button
-                  variant="outline"
+                  variant={isSelected ? "default" : "outline"}
                   onClick={() => onDigitSelect(digit)}
                   className={cn(
-                    'w-11 h-11 sm:w-14 sm:h-14 text-base sm:text-xl font-semibold rounded-lg p-0 transition-all duration-300',
-                    isSelected
-                      ? 'border-red-500 ring-2 ring-red-500'
-                      : 'bg-muted/50 border-muted-foreground/20'
+                    "w-11 h-11 sm:w-14 sm:h-14 text-base sm:text-xl font-semibold rounded-lg p-0 transition-all duration-300",
+                    !isSelected &&
+                      "bg-muted/50 border-muted-foreground/20",
+                    result === "win" &&
+                      showCursor &&
+                      "ring-2 ring-green-500",
+                    result === "loss" &&
+                      showCursor &&
+                      "ring-2 ring-red-500"
                   )}
                 >
                   {digit}
@@ -70,12 +78,12 @@ export function DigitStatsBar({
 
                 <span
                   className={cn(
-                    'text-xs font-mono',
-                    isHighest && 'text-green-500 font-semibold',
-                    isLowest && 'text-red-500 font-semibold',
+                    "text-xs font-mono",
+                    isHighest && "text-green-500 font-semibold",
+                    isLowest && "text-red-500 font-semibold",
                     !isHighest &&
                       !isLowest &&
-                      'text-muted-foreground'
+                      "text-muted-foreground"
                   )}
                 >
                   {pct.toFixed(1)}%
