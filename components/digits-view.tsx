@@ -23,6 +23,8 @@ import type {
 } from '@deriv/core';
 
 import type { ContractMode, TradeType, DigitStats } from '../lib/types';
+import type { OpenPosition } from '@/hooks/use-open-positions';
+import type { ClosedPosition } from '@/hooks/use-closed-positions';
 
 const DIGIT_TRADE_TYPE_OPTIONS: { value: TradeType; label: string }[] = [
   { value: 'matches-differs', label: 'Matches/Differs' },
@@ -77,6 +79,10 @@ export interface DigitsViewProps {
   buyError: string | null;
   clearBuyResult: () => void;
 
+  // pass positions through so TradeControls can react to closes
+  openPositions: OpenPosition[];
+  closedPositions: ClosedPosition[];
+
   logoSrc?: string;
   appName?: string;
 }
@@ -118,6 +124,8 @@ export function DigitsView(props: DigitsViewProps) {
     buyResult,
     buyError,
     clearBuyResult,
+    openPositions,
+    closedPositions,
     logoSrc,
     appName,
   } = props;
@@ -231,6 +239,8 @@ export function DigitsView(props: DigitsViewProps) {
                   buyError={buyError}
                   onClearBuyResult={clearBuyResult}
                   isAuthenticated={authState === 'authenticated'}
+                  openPositions={openPositions}
+                  closedPositions={closedPositions}
                 />
               </CardContent>
             </Card>
